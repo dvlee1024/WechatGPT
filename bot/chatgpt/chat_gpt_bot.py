@@ -36,10 +36,10 @@ class ChatGPTBot(Bot):
             if query in clear_memory_commands:
                 Session.clear_session(session_id)
                 return '记忆已清除'
-            elif query == '#清除所有':
+            elif query == '#clear':
                 Session.clear_all_session()
                 return '所有人记忆已清除'
-            elif query == '#更新配置':
+            elif query == '#update':
                 load_config()
                 return '配置已更新'
 
@@ -74,7 +74,7 @@ class ChatGPTBot(Bot):
                 model= conf().get("model") or "gpt-3.5-turbo",  # 对话模型的名称
                 messages=session,
                 temperature=conf().get('temperature', 0.9),  # 值在[0,1]之间，越大表示回复越具有不确定性
-                #max_tokens=4096,  # 回复最大的字符数
+                max_tokens=conf().get('max_tokens', 1024),  # 回复最大的字符数
                 top_p=1,
                 frequency_penalty=conf().get('frequency_penalty', 0.0),  # [-2,2]之间，该值越大则更倾向于产生不同的内容
                 presence_penalty=conf().get('presence_penalty', 0.0),  # [-2,2]之间，该值越大则更倾向于产生不同的内容

@@ -9,6 +9,8 @@ import json
 from itchat.content import *
 from channel.channel import Channel
 from concurrent.futures import ThreadPoolExecutor
+
+from common import BotBattery
 from common.log import logger
 from common.tmp_dir import TmpDir
 from config import conf
@@ -38,6 +40,8 @@ def handler_single_voice(msg):
 
 
 class WechatChannel(Channel):
+    battery = BotBattery()
+
     def __init__(self):
         pass
 
@@ -113,6 +117,9 @@ class WechatChannel(Channel):
         logger.debug("[WX]receive group msg: " + json.dumps(msg, ensure_ascii=False))
         group_name = msg['User'].get('NickName', None)
         group_id = msg['User'].get('UserName', None)
+
+        battery_left = self.battery.getGroup(group_id)
+
         create_time = msg['CreateTime']             # 消息时间
         if conf().get('hot_reload') == True and int(create_time) < int(time.time()) - 60:    #跳过1分钟前的历史消息
             logger.debug("[WX]history group message skipped")
@@ -134,6 +141,11 @@ class WechatChannel(Channel):
         match_prefix = (msg['IsAt'] and not config.get("group_at_off", False)) or self.check_prefix(origin_content, config.get('group_chat_prefix')) \
                        or self.check_contain(origin_content, config.get('group_chat_keyword'))
         if ('ALL_GROUP' in config.get('group_name_white_list') or group_name in config.get('group_name_white_list') or self.check_contain(group_name, config.get('group_name_keyword_white_list'))) and match_prefix:
+            if battery_left <= 0:
+                msg = f'{self.battery.getMessage(group_id)}，请充电后继续使用。'
+                self.send(conf().get("group_chat_reply_prefix", "") + msg, group_id)
+                return
+
             img_match_prefix = self.check_prefix(content, conf().get('image_create_prefix'))
             if img_match_prefix:
                 content = content.split(img_match_prefix, 1)[1].strip()
@@ -200,6 +212,9 @@ class WechatChannel(Channel):
         context = dict()
         group_name = msg['User']['NickName']
         group_id = msg['User']['UserName']
+
+        battery_left = self.battery.getGroup(group_id)
+
         group_chat_in_one_session = conf().get('group_chat_in_one_session', [])
         if ('ALL_GROUP' in group_chat_in_one_session or \
                 group_name in group_chat_in_one_session or \
@@ -210,7 +225,10 @@ class WechatChannel(Channel):
         reply_text = super().build_reply_content(query, context)
         if reply_text:
             reply_text = '@' + msg['ActualNickName'] + ' ' + reply_text.strip()
+            reply_text = f'{reply_text} \n\n {self.battery.getMessage(group_id)}'
             self.send(conf().get("group_chat_reply_prefix", "") + reply_text, group_id)
+
+        self.battery.spendBattery(group_id)
 
 
     def check_prefix(self, content, prefix_list):
