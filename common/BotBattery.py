@@ -1,5 +1,5 @@
 
-class Battery:
+class Battery(object):
     __spend_value = 5
     group = {}
 
@@ -36,5 +36,3 @@ class Battery:
             return ""
         else:
             return ""
-
-        return "◽◾"

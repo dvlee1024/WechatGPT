@@ -10,7 +10,7 @@ from itchat.content import *
 from channel.channel import Channel
 from concurrent.futures import ThreadPoolExecutor
 
-from common import BotBattery
+from common.BotBattery import Battery
 from common.log import logger
 from common.tmp_dir import TmpDir
 from config import conf
@@ -40,7 +40,7 @@ def handler_single_voice(msg):
 
 
 class WechatChannel(Channel):
-    battery = BotBattery()
+    battery = Battery()
 
     def __init__(self):
         pass
