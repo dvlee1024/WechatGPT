@@ -23,12 +23,14 @@ thread_pool = ThreadPoolExecutor(max_workers=8)
 
 @itchat.msg_register(TEXT)
 def handler_single_msg(msg):
+    print("\n\n\n")
     WechatChannel().handle_text(msg)
     return None
 
 
 @itchat.msg_register(TEXT, isGroupChat=True)
 def handler_group_msg(msg):
+    print("\n\n\n")
     WechatChannel().handle_group(msg)
     return None
 
@@ -41,11 +43,18 @@ def handler_single_voice(msg):
 
 @itchat.msg_register(NOTE)
 def get_note(msg):
+    print("\n\n\n")
     logger.debug("\n <<<<<< [WX]receive NOTE msg: " + json.dumps(msg, ensure_ascii=False))
     if any(s in msg['Text'] for s in (u'红包', u'转账')):
         print(msg['Text'])
     else:
         print('Other note: %s'%msg['Text'])
+
+
+@itchat.msg_register(NOTE, isGroupChat=True)
+def get_note(msg):
+    print("\n\n\n")
+    logger.debug("\n <<<<<< [WX]receive NOTE msg: " + json.dumps(msg, ensure_ascii=False))
 
 
 class WechatChannel(Channel):

@@ -96,7 +96,7 @@ class ChatGPTBot(Bot):
             # api connection exception
             logger.warn(e)
             logger.warn("[OPEN_AI] APIConnection failed")
-            return {"completion_tokens": 0, "content":"我连接不到你的网络"}
+            return {"completion_tokens": 0, "content":"刚才网络异常，求你再问我一次吧"}
         except openai.error.Timeout as e:
             logger.warn(e)
             logger.warn("[OPEN_AI] Timeout")
@@ -105,7 +105,7 @@ class ChatGPTBot(Bot):
             # unknown exception
             logger.exception(e)
             Session.clear_session(session_id)
-            return {"completion_tokens": 0, "content": "请再问我一次吧"}
+            return {"completion_tokens": 0, "content": "发生异常，求你再问我一次吧"}
 
     def create_img(self, query, retry_count=0):
         try:
