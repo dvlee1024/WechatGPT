@@ -61,6 +61,7 @@ class WechatChannel(Channel):
     battery = Battery()
 
     def __init__(self):
+        logger.info("###### Create WechatChannel #####")
         pass
 
     def startup(self):
@@ -94,11 +95,11 @@ class WechatChannel(Channel):
         # logger.debug("\n <<<<<< [WX]receive text msg: " + json.dumps(msg, ensure_ascii=False))
         logger.info(f"\n <<<<< person[{msg['User']['NickName']}] msg: {content} ")
 
-        if content.find('充电10'):
-            self.battery.charge(10)
-            return
-        elif content.find('充电100'):
+        if content.find('充电100') >= 0:
             self.battery.charge(100)
+            return
+        elif content.find('充电10') >= 0:
+            self.battery.charge(10)
             return
 
         self._handle_single_msg(msg, content)
