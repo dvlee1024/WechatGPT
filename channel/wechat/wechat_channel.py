@@ -39,6 +39,15 @@ def handler_single_voice(msg):
     return None
 
 
+@itchat.msg_register(NOTE)
+def get_note(msg):
+    logger.debug("\n <<<<<< [WX]receive NOTE msg: " + json.dumps(msg, ensure_ascii=False))
+    if any(s in msg['Text'] for s in (u'红包', u'转账')):
+        print(msg['Text'])
+    else:
+        print('Other note: %s'%msg['Text'])
+
+
 class WechatChannel(Channel):
     battery = Battery()
 
@@ -71,8 +80,16 @@ class WechatChannel(Channel):
                 self._do_send_text(query, from_user_id)
 
     def handle_text(self, msg):
-        logger.debug("[WX]receive text msg: " + json.dumps(msg, ensure_ascii=False))
         content = msg['Text']
+
+        # logger.debug("\n <<<<<< [WX]receive text msg: " + json.dumps(msg, ensure_ascii=False))
+        logger.info(f"\n <<<<< person[{msg['User']['NickName']}] msg: {content} ")
+
+        if content.find('充电10'):
+            self.battery.charge(10)
+        elif content.find('充电100'):
+            self.battery.charge(100)
+
         self._handle_single_msg(msg, content)
 
     def _handle_single_msg(self, msg, content):
@@ -114,19 +131,21 @@ class WechatChannel(Channel):
 
 
     def handle_group(self, msg):
-        logger.debug("[WX]receive group msg: " + json.dumps(msg, ensure_ascii=False))
+        # logger.debug("\n[WX]receive group msg: " + json.dumps(msg, ensure_ascii=False))
         group_name = msg['User'].get('NickName', None)
         group_id = msg['User'].get('UserName', None)
+        origin_content = msg['Content']
+        create_time = msg['CreateTime']  # 消息时间
+        logger.info(f"\n <<<<< group[{group_name}][group_id] msg: {origin_content} ")
 
         battery_left = self.battery.getGroup(group_id)
 
-        create_time = msg['CreateTime']             # 消息时间
         if conf().get('hot_reload') == True and int(create_time) < int(time.time()) - 60:    #跳过1分钟前的历史消息
             logger.debug("[WX]history group message skipped")
             return
         if not group_name:
             return ""
-        origin_content = msg['Content']
+
         content = msg['Content']
         content_list = content.split(' ', 1)
         context_special_list = content.split('\u2005', 1)

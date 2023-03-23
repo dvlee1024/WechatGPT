@@ -1,29 +1,34 @@
 
 class Battery(object):
-    __spend_value = 5
-    group = {}
+    groups = {}
 
     def __init__(self):
         pass
 
     def getGroup(self, group_id):
-        if not self.group.has_key(group_id):
-            self.group[group_id] = 100
+        if group_id not in self.groups:
+            self.groups[group_id] = 100
 
-        return self.group[group_id]
+        return self.groups[group_id]
 
     def getBattery(self, group_id):
         return self.getGroup(group_id)
 
-    def spendBattery(self, group_id):
-        self.group[group_id] -= self.__spend_value
-        if self.group[group_id] < 0:
-            self.group[group_id] = 0
+    def spendBattery(self, group_id, value=3):
+        self.groups[group_id] -= value
+        if self.groups[group_id] < 0:
+            self.groups[group_id] = 0
 
-        return self.group[group_id]
+        return self.groups[group_id]
+
+    def charge(self, group_id, num=10):
+        for group in self.groups:
+            group += num
+            if group > 100:
+                group = 100
 
     def getMessage(self, group_id):
-        return f'剩余电量：{self.group[group_id]}%'
+        return f'剩余电量：{self.groups[group_id]}%'
 
     def toString(self, value):
         if value > 80:
