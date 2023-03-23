@@ -22,10 +22,10 @@ class Battery(object):
         return self.groups[group_id]
 
     def charge(self, group_id, num=10):
-        for group in self.groups:
-            group += num
-            if group > 100:
-                group = 100
+        for key in self.groups.keys():
+            self.groups[key] += num
+            if self.groups[key] > 100:
+                self.groups[key] = 100
 
     def getMessage(self, group_id):
         return f'剩余电量：{self.groups[group_id]}%'

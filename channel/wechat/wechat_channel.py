@@ -87,8 +87,10 @@ class WechatChannel(Channel):
 
         if content.find('充电10'):
             self.battery.charge(10)
+            return
         elif content.find('充电100'):
             self.battery.charge(100)
+            return
 
         self._handle_single_msg(msg, content)
 
